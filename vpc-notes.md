@@ -3,12 +3,13 @@ In a new markdown file, cover the following:
 # VPCs
 - What are **VPCs**?
     
-    - A Virtual Private Cloud is a secure, individual,private network inside AWS.
-        - the IP address range
-        - the subnets
-        - how traffic flows
-        - which resources are public or private
-        - and the security rules between everything
+        A Virtual Private Cloud is a secure, individual,private network inside AWS.
+
+    - the IP address range
+    - the subnets
+    - how traffic flows
+    - which resources are public or private
+    - and the security rules between everything
 
 - Why use/create/customise them?
         
