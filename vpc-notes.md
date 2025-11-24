@@ -274,22 +274,24 @@ This means the usable range is always “**between**” the first and last IP.
 
 **NAT (Network Address Translation)** allows resources in **private subnets** to access the internet **outbound**, while preventing the internet from initiating connections **inbound**.
 
-Private subnets do not have public IP addresses, so they cannot reach the internet directly.  
+Private subnets do not have public IP addresses, so they cannot reach the internet directly. 
+
 A NAT device solves this by acting as a bridge.
 
 ---
 
 ### Why NAT is needed
 
-Private EC2 instances often need to:
+**Private EC2 instances** often need to:
 
-- download software updates
+- **download software updates**
 - access external APIs
 - connect to package repositories (npm, apt, yum)
 - send telemetry or logs
 
 But they must remain **unreachable** from the public internet for security.  
-NAT enables this exact behaviour.
+            
+        NAT enables this exact behaviour.
 
 ---
 
@@ -309,25 +311,204 @@ Key characteristics:
 ---
 
 ### How it works (simple flow)
+Private EC2 → Route Table → NAT Gateway → Internet
+Internet → NAT Gateway → Private EC2 (response only)
+
+## Subnets
+
+### Public and Private Subnets
+
+A **subnet** is a smaller section of a VPC’s IP range.  
+We normally create two types:
+
+#### **Public Subnet**
+- Has a route to an **Internet Gateway (IGW)**
+- Resources inside can receive traffic from the internet
+- Used for: load balancers, NAT gateways, bastion hosts, public-facing apps
+
+#### **Private Subnet**
+- No direct route to the internet
+- Can only reach the internet through a **NAT Gateway**
+- Used for: databases, internal services, backend application servers
+
+This separation improves security and follows cloud best practices.
+
+---
+
+### How do Availability Zones (AZs) relate to Subnets?
+
+- A **subnet always lives inside exactly one Availability Zone**
+- You **cannot** span a subnet across multiple AZs
+- If you want high availability, you create **one subnet per AZ**
+  - e.g., `public-subnet-a` in `eu-west-1a`
+  - e.g., `public-subnet-b` in `eu-west-1b`
+
+AWS recommends using **multiple AZs** so your architecture can survive datacentre failures.
+
+In short:
+
+**Subnets belong to AZs, and we create pairs of public/private subnets across AZs for resilience.**
 
 
-## Subnets:
-- Public and Private subnets
-- How do AZs relate to subnets?
+## Gateways
 
-## Gateways:
-- NAT Gateways vs Internet Gateways
-- How do public subnets access the internet?
-- Why do private subnets need NAT?
-- Are there cost differences?
-- Different architectures?
+### NAT Gateways vs Internet Gateways
 
-## Route Tables:
-- What does a "default" route table look like?
-- Local routing
-- 0.0.0.0/0 routing
-- Routes to NAT gateway vs internet gateway
-- How do RT association work?
+**Internet Gateway (IGW)**  
+- A gateway that allows resources in **public subnets** to send and receive traffic from the internet.  
+- Required for public-facing services like load balancers or bastion hosts.  
+- Does not perform NAT or hide IPs.
+
+**NAT Gateway (NGW)**  
+- Allows resources in **private subnets** to access the internet **outbound only**.  
+- Prevents inbound connections from the internet.  
+- Used for backend servers or databases that need updates but must remain private.
+
+---
+
+Resources in that subnet:
+- Usually have a **public IPv4 address**  
+- Can receive inbound connections from the internet  
+- Can send outbound traffic directly
+
+---
+
+### Why do private subnets need NAT?
+
+Private subnets do **not** have a route to the Internet Gateway.  
+They cannot access the internet directly.
+
+A **NAT Gateway** solves this by:
+
+- Forwarding outbound traffic to the internet on behalf of private instances  
+- Ensuring no inbound traffic can reach those instances  
+- Keeping databases and backend services private and secure
+
+This is essential for secure architectures.
+
+---
+
+### Cost Differences
+
+- **Internet Gateway (IGW):**  
+  - **Free** (no hourly charge)  
+  - Only pays for data transfer
+
+- **NAT Gateway:**  
+  - **Paid service**  
+  - Hourly charge + per-GB data processing fee  
+  - More expensive due to managed NAT functionality
+
+For cost-sensitive architectures, people sometimes replace NGW with:
+- NAT **instances** (EC2 acting as NAT)  
+- IPv6 (does not require NAT)
+
+---
+
+### Different Architectures
+
+Common patterns include:
+
+1. **Simple 2-tier architecture**
+   - Public subnet: IGW, Load Balancer, NAT Gateway  
+   - Private subnet: EC2, DB, backend services
+
+2. **Multi-AZ architecture**
+   - One public + one private subnet per AZ  
+   - One NAT per AZ for high availability
+
+3. **Cost-optimised architecture**
+   - One NAT for multiple private subnets (less resilient but cheaper)
+
+4. **IPv6 architecture (no NAT)**
+   - Uses egress-only internet gateways  
+   - Instances get globally routable IPv6 addresses  
+   - No need for NAT
+
+Each structure depends on cost, availability, and security needs.
+
+
+### How do public subnets access the internet?
+
+A subnet becomes **public** when its **route table** includes:
+0.0.0.0/0 → Internet Gateway
+
+
+## Route Tables
+
+### What does a "default" route table look like?
+A default VPC comes with a **main route table** that contains only one route:
+Destination: 10.0.0.0/16 (VPC CIDR)
+Target: local
+```
+This means:
+- All traffic **inside the VPC** can communicate freely  
+- No internet access until additional routes are added
+```
+---
+
+### Local routing
+Every route table always includes:
+Destination: <VPC CIDR>
+
+Target: local
+
+```
+This “local” route:
+- Cannot be removed  
+- Ensures all subnets inside the same VPC can talk to each other  
+- Is the foundation of internal communication (EC2 ↔ RDS ↔ EC2 etc.)
+
+---
+
+### 0.0.0.0/0 routing
+`0.0.0.0/0` means **any IP address** (all traffic that is not local).
+```
+Where this traffic goes defines the subnet type:
+**Public subnet**
+
+
+0.0.0.0/0 → Internet Gateway (IGW)
+**Private subnet**
+0.0.0.0/0 → NAT Gateway (NGW)
+```
+
+This single line decides whether a subnet is public or private.
+
+---
+
+### Routes to NAT gateway vs Internet gateway
+
+| Subnet Type | 0.0.0.0/0 Route Goes To | Purpose |
+|-------------|-------------------------|---------|
+| **Public Subnet** | IGW | Public-facing apps, load balancers, bastion hosts |
+| **Private Subnet** | NAT Gateway | Backend services needing outbound internet but no inbound access |
+
+**IGW = inbound + outbound**  
+**NAT Gateway = outbound only, inbound blocked**
+
+---
+
+### How do route table associations work?
+- Every **subnet must be associated** with exactly **one** route table  
+- A route table may be associated with **multiple** subnets  
+- If a subnet is not manually associated, it automatically uses the **Main Route Table**
+
+So normally:
+- Public subnets → associated with a **public route table**
+- Private subnets → associated with a **private route table**
+
+This is how AWS decides:
+- which subnets can access the internet  
+- which must stay private  
+- how traffic flows between subnets or out of the VPC
+```
+
+
+**Public subnet**
+
+
+
 
 ## SGs and NACLs:
 - What are ports?
