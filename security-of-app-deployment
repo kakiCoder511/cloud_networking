@@ -1,0 +1,7 @@
+If you finish the VPC documentation task, or get bored, you  could try to improve the security of our app and database deployment WITHOUT making/creating a VPC.
+
+Some ideas:
+- Disable public IP for the db instance
+- Make SG rules only allow specific IP address for the db connection
+
+If you do these or find other ways to improve security then please be open to sharing them tomorrow morning.
