@@ -212,7 +212,11 @@ Examples:
 - **/16** → common size for VPCs  
 - **/24** → common size for subnets
 
-AWS Networking Basics For Programmers | 
+🧮 CIDR Calculator| [CIDR Calculator](https://cidr.xyz/)
+
+🧮 IP Subnet Calculator | [IP Subnet Calculator](https://www.calculator.net/ip-subnet-calculator.html)
+
+📽️ AWS Networking Basics For Programmers | 
 [YouTube link](https://www.youtube.com/watch?v=2doSoMN2xvI&t=127s)
 ```
 [8 bits].[8 bits].[8 bits].[8 bits] = 32 bits
