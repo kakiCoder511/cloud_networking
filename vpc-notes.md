@@ -276,11 +276,13 @@ AWS also reserves **5 IP addresses** inside every subnet:
 This means the usable range is always “**between**” the first and last IP.
 
 
-## What is NAT?
+## 💰What is NAT?
 
-**NAT (Network Address Translation)** allows resources in **private subnets** to access the internet **outbound**, while preventing the internet from initiating connections **inbound**.
+**NAT (Network Address Translation)** 
 
-Private subnets do not have public IP addresses, so they cannot reach the internet directly. 
+ - allows resources in **private subnets** to access the internet **outbound**, while preventing the internet from initiating connections **inbound**.
+
+- Private subnets do not have public IP addresses, so they cannot reach the internet directly. 
 
 A NAT device solves this by acting as a bridge.
 
