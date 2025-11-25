@@ -212,6 +212,8 @@ Examples:
 - **/16** → common size for VPCs  
 - **/24** → common size for subnets
 
+AWS Networking Basics For Programmers | 
+[YouTube link](https://www.youtube.com/watch?v=2doSoMN2xvI&t=127s)
 ```
 [8 bits].[8 bits].[8 bits].[8 bits] = 32 bits
 10.0.0.0/24
@@ -221,7 +223,7 @@ Examples:
 /16 last two numbers 10.0.0.1 - 10.0.255.254
 /8 last  three numbers 10.0.0.1 - 10.255.255.254
 
- https://www.youtube.com/watch?v=2doSoMN2xvI&t=127s
+ 
 
 ```
 ## Subnet masks
