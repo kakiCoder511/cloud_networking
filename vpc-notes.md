@@ -322,7 +322,10 @@ A **subnet** is a smaller section of a VPC’s IP range.
   
     A subnet is a defined set of network IP addresses that are used to increase the security and efficiency of network communications. You can think them like a postal codes, used for routing packages from one location to another.
 
+
 We normally create two types:
+
+![EC2 Instances in Public subnet](./public/Ec2%20instance%20in%20a%20public%20subnet.jpg)
 
 #### **Public Subnet**
 - Has a route to an **Internet Gateway (IGW)**
