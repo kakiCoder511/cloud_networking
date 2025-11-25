@@ -1,3 +1,6 @@
+
+![VPC Diagram](../public/vpc%20diagram.jpg)
+
 # public app instance setting on AWS
 
 ## name a instance
@@ -20,7 +23,10 @@ click **edit** to select your VPC
 ### VPC
 key things
 - se-kaki-2tier-vpc
+
 - **Auto-assign public IP** - disable
+ 
+        choose the correct **Subnet** !!!! 
 
 ![Public Subnet security group](../public/Networksetting_publicsubnet%20.jpg)
 
