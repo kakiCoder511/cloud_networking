@@ -27,6 +27,8 @@ key things
 - **Auto-assign public IP** - disable
  
         choose the correct **Subnet** !!!! 
+        I used the wrong one in the below image, because I am setting Private-subnet, but I picked the publicsubnet. 
+        so mismatched.
 
 ![Public Subnet security group](../public/Networksetting_publicsubnet%20.jpg)
 
